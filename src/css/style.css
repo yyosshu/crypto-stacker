@@ -33,6 +33,13 @@ body {
     gap: 8px;
 }
 
+.currency-pair {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #666;
+    margin-right: 4px;
+}
+
 .price-value {
     font-size: 2.5rem;
     font-weight: 700;
@@ -277,6 +284,10 @@ body {
     
     .price-value {
         color: #f1f5f9;
+    }
+    
+    .currency-pair {
+        color: #94a3b8;
     }
     
     .chart-container {
