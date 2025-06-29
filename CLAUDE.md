@@ -92,3 +92,4 @@ src/
 - 1行のコミットメッセージのみ使用
 - 簡潔で説明的な内容にする
 - 例：「Add real-time BTC/JPY price chart with timeframe-based candlestick visualization」
+- **「🤖 Generated with [Claude Code]」以降のテンプレート文は不要**
