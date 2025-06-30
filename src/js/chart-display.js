@@ -39,8 +39,7 @@ class ChartDisplay {
                         display: false
                     },
                     tooltip: {
-                        enabled: false,
-                        external: this.customTooltip.bind(this)
+                        enabled: false
                     }
                 },
                 scales: {
@@ -93,7 +92,7 @@ class ChartDisplay {
         };
         
         this.initChart();
-        this.setupTooltip();
+        this.setupCustomTooltip();
     }
 
     initChart() {
@@ -226,27 +225,67 @@ class ChartDisplay {
         this.chart.options.scales.x.time.displayFormats = displayFormat;
     }
 
-    setupTooltip() {
+    setupCustomTooltip() {
         this.tooltipEl = document.getElementById('chartTooltip');
+        if (!this.tooltipEl) return;
+
+        // Add mouse event listeners to canvas
+        this.canvas.addEventListener('mousemove', this.handleMouseMove.bind(this));
+        this.canvas.addEventListener('mouseleave', this.hideTooltip.bind(this));
     }
 
-    customTooltip(context) {
-        const tooltip = context.tooltip;
+    handleMouseMove(event) {
+        if (!this.chart || this.dataPoints.length === 0) return;
+
+        const rect = this.canvas.getBoundingClientRect();
+        const mouseX = event.clientX - rect.left;
+        const mouseY = event.clientY - rect.top;
+
+        // Find the nearest data point
+        const nearestPoint = this.findNearestDataPoint(mouseX, mouseY);
         
-        if (!this.tooltipEl) return;
-        
-        // Hide tooltip if no data
-        if (tooltip.opacity === 0) {
-            this.tooltipEl.style.opacity = 0;
-            return;
+        if (nearestPoint) {
+            this.showTooltip(nearestPoint, event.clientX, event.clientY);
+        } else {
+            this.hideTooltip();
         }
+    }
+
+    findNearestDataPoint(mouseX, mouseY) {
+        const chartArea = this.chart.chartArea;
         
-        // Get tooltip data
-        const dataPoint = tooltip.dataPoints[0];
-        if (!dataPoint) return;
+        // Convert mouse position to chart data coordinates
+        const xScale = this.chart.scales.x;
+        const yScale = this.chart.scales.y;
         
-        const price = dataPoint.parsed.y;
-        const time = new Date(dataPoint.parsed.x);
+        if (mouseX < chartArea.left || mouseX > chartArea.right ||
+            mouseY < chartArea.top || mouseY > chartArea.bottom) {
+            return null;
+        }
+
+        // Find closest data point by X coordinate
+        const mouseTime = xScale.getValueForPixel(mouseX);
+        let closestPoint = null;
+        let minDistance = Infinity;
+
+        this.dataPoints.forEach((point, index) => {
+            const pointTime = new Date(point.x).getTime();
+            const distance = Math.abs(pointTime - mouseTime);
+            
+            if (distance < minDistance) {
+                minDistance = distance;
+                closestPoint = { ...point, index };
+            }
+        });
+
+        return closestPoint;
+    }
+
+    showTooltip(dataPoint, clientX, clientY) {
+        if (!this.tooltipEl || !dataPoint) return;
+
+        const price = dataPoint.y;
+        const time = new Date(dataPoint.x);
         
         // Format price
         const formattedPrice = new Intl.NumberFormat('ja-JP').format(Math.round(price));
@@ -261,13 +300,18 @@ class ChartDisplay {
         this.tooltipEl.querySelector('.tooltip-price').textContent = `¥${formattedPrice}`;
         this.tooltipEl.querySelector('.tooltip-time').textContent = formattedTime;
         
-        // Position tooltip
-        const canvas = this.chart.canvas;
-        const rect = canvas.getBoundingClientRect();
-        
+        // Position tooltip at actual mouse position
         this.tooltipEl.style.opacity = 1;
-        this.tooltipEl.style.left = rect.left + tooltip.caretX - this.tooltipEl.offsetWidth / 2 + 'px';
-        this.tooltipEl.style.top = rect.top + tooltip.caretY - this.tooltipEl.offsetHeight - 10 + 'px';
+        this.tooltipEl.style.position = 'fixed';
+        this.tooltipEl.style.left = (clientX - this.tooltipEl.offsetWidth / 2) + 'px';
+        this.tooltipEl.style.top = (clientY - this.tooltipEl.offsetHeight - 15) + 'px';
+        this.tooltipEl.style.zIndex = 1000;
+    }
+
+    hideTooltip() {
+        if (this.tooltipEl) {
+            this.tooltipEl.style.opacity = 0;
+        }
     }
 
     // Add real-time pulsing dot at the latest price

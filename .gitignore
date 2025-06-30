@@ -46,3 +46,4 @@ coverage/
 # API keys and secrets
 config/keys.js
 *.pem
+.vercel
