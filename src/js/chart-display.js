@@ -226,12 +226,96 @@ class ChartDisplay {
     }
 
     setupCustomTooltip() {
-        this.tooltipEl = document.getElementById('chartTooltip');
-        if (!this.tooltipEl) return;
-
+        this.setupCrosshair();
+        
         // Add mouse event listeners to canvas
         this.canvas.addEventListener('mousemove', this.handleMouseMove.bind(this));
-        this.canvas.addEventListener('mouseleave', this.hideTooltip.bind(this));
+        this.canvas.addEventListener('mouseleave', this.hideCrosshair.bind(this));
+    }
+
+    setupCrosshair() {
+        // Create crosshair elements
+        const chartContainer = this.canvas.parentElement;
+        
+        // Create crosshair lines container
+        this.crosshairContainer = document.createElement('div');
+        this.crosshairContainer.className = 'crosshair-container';
+        this.crosshairContainer.style.cssText = `
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        `;
+        
+        // Vertical line
+        this.verticalLine = document.createElement('div');
+        this.verticalLine.className = 'crosshair-vertical';
+        this.verticalLine.style.cssText = `
+            position: absolute;
+            width: 0;
+            height: 100%;
+            border-left: 2px dashed #0066ff;
+            opacity: 0;
+            transition: opacity 0.1s ease;
+        `;
+        
+        // Horizontal line
+        this.horizontalLine = document.createElement('div');
+        this.horizontalLine.className = 'crosshair-horizontal';
+        this.horizontalLine.style.cssText = `
+            position: absolute;
+            width: 100%;
+            height: 0;
+            border-top: 2px dashed #0066ff;
+            opacity: 0;
+            transition: opacity 0.1s ease;
+        `;
+        
+        // X-axis label (time)
+        this.xAxisLabel = document.createElement('div');
+        this.xAxisLabel.className = 'crosshair-x-label';
+        this.xAxisLabel.style.cssText = `
+            position: absolute;
+            background: #0066ff;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.1s ease;
+            transform: translateX(-50%);
+        `;
+        
+        // Y-axis label (price)
+        this.yAxisLabel = document.createElement('div');
+        this.yAxisLabel.className = 'crosshair-y-label';
+        this.yAxisLabel.style.cssText = `
+            position: absolute;
+            background: #0066ff;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.1s ease;
+            transform: translateY(-50%);
+        `;
+        
+        // Add elements to container
+        this.crosshairContainer.appendChild(this.verticalLine);
+        this.crosshairContainer.appendChild(this.horizontalLine);
+        this.crosshairContainer.appendChild(this.xAxisLabel);
+        this.crosshairContainer.appendChild(this.yAxisLabel);
+        
+        // Add container to chart container
+        chartContainer.appendChild(this.crosshairContainer);
     }
 
     handleMouseMove(event) {
@@ -241,13 +325,28 @@ class ChartDisplay {
         const mouseX = event.clientX - rect.left;
         const mouseY = event.clientY - rect.top;
 
-        // Find the nearest data point
-        const nearestPoint = this.findNearestDataPoint(mouseX, mouseY);
+        // Use Chart.js built-in method to get elements at mouse position
+        const points = this.chart.getElementsAtEventForMode(event, 'index', { intersect: false }, false);
         
-        if (nearestPoint) {
-            this.showTooltip(nearestPoint, event.clientX, event.clientY);
+        if (points.length > 0) {
+            // Get the first (nearest) point that Chart.js found
+            const point = points[0];
+            const datasetIndex = point.datasetIndex;
+            const dataIndex = point.index;
+            
+            // Get the actual data point
+            const dataPoint = this.dataPoints[dataIndex];
+            
+            if (dataPoint) {
+                // Use Chart.js's own calculated position
+                const pointElement = this.chart.getDatasetMeta(datasetIndex).data[dataIndex];
+                
+                // Chart.js's calculated position is now used directly"
+                
+                this.showCrosshair(dataPoint, pointElement.x, pointElement.y);
+            }
         } else {
-            this.hideTooltip();
+            this.hideCrosshair();
         }
     }
 
@@ -281,37 +380,74 @@ class ChartDisplay {
         return closestPoint;
     }
 
-    showTooltip(dataPoint, clientX, clientY) {
-        if (!this.tooltipEl || !dataPoint) return;
+    showCrosshair(dataPoint, pointX, pointY) {
+        if (!dataPoint) return;
 
+        const chartArea = this.chart.chartArea;
+        
+        // Convert Chart.js canvas coordinates to container coordinates
+        // Chart.js provides canvas-relative coordinates, need to adjust for container offset
+        const canvasRect = this.canvas.getBoundingClientRect();
+        const containerRect = this.crosshairContainer.getBoundingClientRect();
+        
+        // Calculate offset between canvas and container
+        const offsetX = canvasRect.left - containerRect.left;
+        const offsetY = canvasRect.top - containerRect.top;
+        
+        // Adjust coordinates
+        const dataX = pointX + offsetX;
+        const dataY = pointY + offsetY;
+        
+        // Show crosshair lines positioned at exact Chart.js point position
+        this.verticalLine.style.left = dataX + 'px';
+        this.verticalLine.style.top = chartArea.top + 'px';
+        this.verticalLine.style.height = (chartArea.bottom - chartArea.top) + 'px';
+        this.verticalLine.style.opacity = '0.8';
+        
+        this.horizontalLine.style.left = chartArea.left + 'px';
+        this.horizontalLine.style.top = dataY + 'px';
+        this.horizontalLine.style.width = (chartArea.right - chartArea.left) + 'px';
+        this.horizontalLine.style.opacity = '0.8';
+        
+        // Format and show labels
         const price = dataPoint.y;
         const time = new Date(dataPoint.x);
         
         // Format price
         const formattedPrice = new Intl.NumberFormat('ja-JP').format(Math.round(price));
         
-        // Format time
-        const formattedTime = time.toLocaleTimeString('ja-JP', {
-            hour: '2-digit',
-            minute: '2-digit'
-        });
+        // Format time based on timeframe
+        let formattedTime;
+        if (this.currentTimeframe === '1day') {
+            formattedTime = time.toLocaleDateString('ja-JP', {
+                month: '2-digit',
+                day: '2-digit'
+            });
+        } else {
+            formattedTime = time.toLocaleTimeString('ja-JP', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
         
-        // Update tooltip content
-        this.tooltipEl.querySelector('.tooltip-price').textContent = `¥${formattedPrice}`;
-        this.tooltipEl.querySelector('.tooltip-time').textContent = formattedTime;
+        // Position X-axis label outside chart area (below the chart)
+        this.xAxisLabel.textContent = formattedTime;
+        this.xAxisLabel.style.left = dataX + 'px';
+        this.xAxisLabel.style.top = (chartArea.bottom + 15) + 'px';
+        this.xAxisLabel.style.opacity = '1';
         
-        // Position tooltip at actual mouse position
-        this.tooltipEl.style.opacity = 1;
-        this.tooltipEl.style.position = 'fixed';
-        this.tooltipEl.style.left = (clientX - this.tooltipEl.offsetWidth / 2) + 'px';
-        this.tooltipEl.style.top = (clientY - this.tooltipEl.offsetHeight - 15) + 'px';
-        this.tooltipEl.style.zIndex = 1000;
+        // Position Y-axis label outside chart area (right of the chart)
+        this.yAxisLabel.textContent = '¥' + formattedPrice;
+        this.yAxisLabel.style.left = (chartArea.right + 15) + 'px';
+        this.yAxisLabel.style.top = dataY + 'px';
+        this.yAxisLabel.style.opacity = '1';
     }
 
-    hideTooltip() {
-        if (this.tooltipEl) {
-            this.tooltipEl.style.opacity = 0;
-        }
+    hideCrosshair() {
+        if (this.verticalLine) this.verticalLine.style.opacity = '0';
+        if (this.horizontalLine) this.horizontalLine.style.opacity = '0';
+        if (this.xAxisLabel) this.xAxisLabel.style.opacity = '0';
+        if (this.yAxisLabel) this.yAxisLabel.style.opacity = '0';
     }
 
     // Add real-time pulsing dot at the latest price

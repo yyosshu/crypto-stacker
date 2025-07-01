@@ -179,44 +179,7 @@ body {
     height: 400px;
 }
 
-/* Chart tooltip */
-.chart-tooltip {
-    position: absolute;
-    background: #c8a882;
-    color: white;
-    padding: 8px 12px;
-    border-radius: 6px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-    z-index: 10;
-    font-variant-numeric: tabular-nums;
-}
-
-.chart-tooltip::after {
-    content: '';
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 0;
-    height: 0;
-    border-left: 6px solid transparent;
-    border-right: 6px solid transparent;
-    border-top: 6px solid #c8a882;
-}
-
-.tooltip-price {
-    font-weight: 600;
-    margin-bottom: 2px;
-}
-
-.tooltip-time {
-    font-size: 0.75rem;
-    opacity: 0.9;
-}
+/* Chart crosshair styles are handled by JavaScript */
 
 /* Chart info footer */
 .chart-info {
