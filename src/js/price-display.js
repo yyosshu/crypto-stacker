@@ -1,7 +1,6 @@
 class PriceDisplay {
     constructor() {
         this.currentPriceElement = document.getElementById('currentPrice');
-        this.priceChangeElement = document.getElementById('priceChange');
         this.connectionStatusElement = document.getElementById('connectionStatus');
         this.highPriceElement = document.getElementById('highPrice');
         this.lowPriceElement = document.getElementById('lowPrice');
@@ -12,7 +11,6 @@ class PriceDisplay {
         this.dailyHigh = null;
         this.dailyLow = null;
         this.dailyVolume = 0;
-        this.sessionStartPrice = null;
         
         // Flash animation timeout
         this.flashTimeout = null;
@@ -37,8 +35,6 @@ class PriceDisplay {
         // Update high/low tracking
         this.updateHighLow(currentPrice);
         
-        // Calculate and display price change
-        this.updatePriceChange(currentPrice);
         
         // Update timestamp
         this.updateTimestamp();
@@ -50,29 +46,6 @@ class PriceDisplay {
         this.previousPrice = currentPrice;
     }
 
-    updatePriceChange(currentPrice) {
-        if (this.sessionStartPrice === null) {
-            this.sessionStartPrice = currentPrice;
-            return;
-        }
-
-        const change = currentPrice - this.sessionStartPrice;
-        const changePercent = (change / this.sessionStartPrice) * 100;
-        
-        const changeText = `${change >= 0 ? '↑' : '↓'} ${change >= 0 ? '+' : ''}${this.formatPrice(Math.abs(change))} (${changePercent >= 0 ? '+' : ''}${changePercent.toFixed(2)}%)`;
-        
-        this.priceChangeElement.textContent = changeText;
-        
-        // Update CSS classes
-        this.priceChangeElement.className = 'price-change';
-        if (change > 0) {
-            this.priceChangeElement.classList.add('positive');
-        } else if (change < 0) {
-            this.priceChangeElement.classList.add('negative');
-        } else {
-            this.priceChangeElement.classList.add('neutral');
-        }
-    }
 
     updateHighLow(currentPrice) {
         // Initialize or update daily high
@@ -147,17 +120,12 @@ class PriceDisplay {
         this.dailyHigh = null;
         this.dailyLow = null;
         this.dailyVolume = 0;
-        this.sessionStartPrice = null;
         
         this.highPriceElement.textContent = '--';
         this.lowPriceElement.textContent = '--';
         this.volumeElement.textContent = '--';
     }
 
-    // Set initial price (for calculating daily change)
-    setSessionStartPrice(price) {
-        this.sessionStartPrice = price;
-    }
 }
 
 // Add CSS for flash animations
