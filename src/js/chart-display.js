@@ -257,7 +257,7 @@ class ChartDisplay {
             position: absolute;
             width: 0;
             height: 100%;
-            border-left: 2px dashed #0066ff;
+            border-left: 2px dashed #C8A882;
             opacity: 0;
             transition: opacity 0.1s ease;
         `;
@@ -269,7 +269,7 @@ class ChartDisplay {
             position: absolute;
             width: 100%;
             height: 0;
-            border-top: 2px dashed #0066ff;
+            border-top: 2px dashed #C8A882;
             opacity: 0;
             transition: opacity 0.1s ease;
         `;
@@ -279,7 +279,7 @@ class ChartDisplay {
         this.xAxisLabel.className = 'crosshair-x-label';
         this.xAxisLabel.style.cssText = `
             position: absolute;
-            background: #0066ff;
+            background: #C8A882;
             color: white;
             padding: 4px 8px;
             border-radius: 4px;
@@ -296,7 +296,7 @@ class ChartDisplay {
         this.yAxisLabel.className = 'crosshair-y-label';
         this.yAxisLabel.style.cssText = `
             position: absolute;
-            background: #0066ff;
+            background: #C8A882;
             color: white;
             padding: 4px 8px;
             border-radius: 4px;
