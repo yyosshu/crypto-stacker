@@ -245,6 +245,229 @@ body {
     }
 }
 
+/* Position management section */
+.position-section {
+    background: white;
+    border-radius: 8px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
+.position-section h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #374151;
+}
+
+/* Position form */
+.position-form {
+    display: flex;
+    gap: 16px;
+    align-items: end;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.form-group label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+.form-group input {
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    min-width: 140px;
+    transition: border-color 0.2s ease;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.add-btn {
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.add-btn:hover {
+    background-color: #2563eb;
+}
+
+.error-message {
+    color: #dc2626;
+    font-size: 0.875rem;
+    margin-top: 8px;
+    padding: 8px 12px;
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 6px;
+    width: 100%;
+}
+
+/* Positions display */
+.positions-display {
+    margin-top: 24px;
+}
+
+.no-positions {
+    text-align: center;
+    color: #6b7280;
+    padding: 32px;
+    font-style: italic;
+}
+
+.positions-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.positions-table th,
+.positions-table td {
+    text-align: left;
+    padding: 12px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.positions-table th {
+    font-weight: 600;
+    color: #374151;
+    background-color: #f9fafb;
+    font-size: 0.875rem;
+}
+
+.positions-table td {
+    font-size: 0.875rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.profit-loss.profit {
+    color: #16a34a;
+    font-weight: 600;
+}
+
+.profit-loss.loss {
+    color: #dc2626;
+    font-weight: 600;
+}
+
+.purchase-date {
+    font-size: 0.8rem;
+    color: #6b7280;
+    white-space: nowrap;
+}
+
+.remove-btn {
+    background-color: #ef4444;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.remove-btn:hover {
+    background-color: #dc2626;
+}
+
+/* Total summary */
+.total-summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background-color: #f9fafb;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+}
+
+.total-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.total-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+.total-value,
+.total-rate {
+    font-size: 1rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.total-value.profit,
+.total-rate.profit {
+    color: #16a34a;
+}
+
+.total-value.loss,
+.total-rate.loss {
+    color: #dc2626;
+}
+
+/* Responsive design for position section */
+@media (max-width: 768px) {
+    .position-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .form-group {
+        width: 100%;
+    }
+    
+    .form-group input {
+        min-width: unset;
+        width: 100%;
+    }
+    
+    .positions-table {
+        font-size: 0.75rem;
+    }
+    
+    .positions-table th,
+    .positions-table td {
+        padding: 8px 4px;
+    }
+    
+    .purchase-date {
+        font-size: 0.65rem;
+    }
+    
+    .total-summary {
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch;
+    }
+}
+
 /* Dark theme support */
 @media (prefers-color-scheme: dark) {
     body {
@@ -260,7 +483,8 @@ body {
         color: #94a3b8;
     }
     
-    .chart-container {
+    .chart-container,
+    .position-section {
         background: #1e293b;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
     }
@@ -276,5 +500,53 @@ body {
     
     .info-value {
         color: #e2e8f0;
+    }
+    
+    .position-section h2 {
+        color: #e2e8f0;
+    }
+    
+    .form-group label {
+        color: #e2e8f0;
+    }
+    
+    .form-group input {
+        background-color: #374151;
+        border-color: #4b5563;
+        color: #e2e8f0;
+    }
+    
+    .form-group input:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    
+    .positions-table th {
+        background-color: #374151;
+        color: #e2e8f0;
+    }
+    
+    .positions-table th,
+    .positions-table td {
+        border-bottom-color: #4b5563;
+    }
+    
+    .total-summary {
+        background-color: #374151;
+        border-color: #4b5563;
+    }
+    
+    .total-label {
+        color: #e2e8f0;
+    }
+    
+    .no-positions {
+        color: #9ca3af;
+    }
+    
+    .error-message {
+        background-color: #7f1d1d;
+        border-color: #991b1b;
+        color: #fecaca;
     }
 }

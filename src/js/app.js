@@ -4,6 +4,8 @@ class CryptoStackerApp {
         this.priceDisplay = null;
         this.chartDisplay = null;
         this.apiClient = null;
+        this.positionManager = null;
+        this.profitLossDisplay = null;
         this.updateInterval = null;
         this.isInitialized = false;
         
@@ -25,6 +27,11 @@ class CryptoStackerApp {
             this.wsManager = new WebSocketManager();
             this.apiClient = new ApiClient();
             this.candleManager = new CandleManager('5min'); // Default 5min
+            this.positionManager = new PositionManager();
+            this.profitLossDisplay = new ProfitLossDisplay(this.positionManager);
+            
+            // Initial render of profit/loss display
+            this.profitLossDisplay.render();
             
             // Setup event listeners
             this.setupEventListeners();
@@ -106,6 +113,9 @@ class CryptoStackerApp {
         try {
             // Update price display
             this.priceDisplay.updatePrice(priceData);
+            
+            // Update profit/loss display with new price
+            this.profitLossDisplay.updateCurrentPrice(priceData.price);
             
             // Add tick to candle manager (handles timeframe logic)
             this.candleManager.addTick(priceData);
@@ -285,7 +295,10 @@ document.addEventListener('DOMContentLoaded', () => {
     window.cryptoApp = new CryptoStackerApp();
     
     // Initialize the app
-    window.cryptoApp.init().catch(error => {
+    window.cryptoApp.init().then(() => {
+        // Make profitLossDisplay globally accessible for HTML event handlers
+        window.profitLossDisplay = window.cryptoApp.profitLossDisplay;
+    }).catch(error => {
         console.error('Failed to start app:', error);
     });
 });

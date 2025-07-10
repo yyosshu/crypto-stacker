@@ -40,6 +40,62 @@
             <canvas id="priceChart" width="800" height="400"></canvas>
         </main>
 
+        <!-- Position Management Section -->
+        <section class="position-section">
+            <h2>ポジション管理</h2>
+            
+            <!-- Position Form -->
+            <div class="position-form" id="positionForm">
+                <div class="form-group">
+                    <label for="purchaseDate">購入日時</label>
+                    <input type="datetime-local" id="purchaseDate">
+                </div>
+                <div class="form-group">
+                    <label for="purchasePrice">購入価格 (円)</label>
+                    <input type="number" id="purchasePrice" placeholder="例: 10000000" min="0" step="1">
+                </div>
+                <div class="form-group">
+                    <label for="purchaseQuantity">購入数量 (BTC)</label>
+                    <input type="number" id="purchaseQuantity" placeholder="例: 0.01" min="0" step="0.00000001">
+                </div>
+                <button id="addPositionBtn" class="add-btn">追加</button>
+                <div class="error-message" id="errorMessage" style="display: none;"></div>
+            </div>
+
+            <!-- Positions Table -->
+            <div class="positions-display">
+                <div class="no-positions" id="noPositionsMessage">
+                    ポジションがありません。上記フォームから追加してください。
+                </div>
+                
+                <table class="positions-table" id="positionsTable" style="display: none;">
+                    <thead>
+                        <tr>
+                            <th>購入日時</th>
+                            <th>購入価格</th>
+                            <th>数量</th>
+                            <th>損益</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="positionsTableBody">
+                    </tbody>
+                </table>
+
+                <!-- Total Summary -->
+                <div class="total-summary" id="totalSummary">
+                    <div class="total-row">
+                        <span class="total-label">合計損益:</span>
+                        <span class="total-value" id="totalProfitLoss">¥0</span>
+                    </div>
+                    <div class="total-row">
+                        <span class="total-label">損益率:</span>
+                        <span class="total-rate" id="totalProfitLossRate">0.00%</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
     </div>
 
     <!-- Scripts -->
@@ -52,6 +108,8 @@
     <script src="src/js/websocket-manager-real.js"></script>
     <script src="src/js/chart-display.js"></script>
     <script src="src/js/price-display.js"></script>
+    <script src="src/js/position-manager.js"></script>
+    <script src="src/js/profit-loss-display.js"></script>
     <script src="src/js/app.js"></script>
 </body>
 </html>
