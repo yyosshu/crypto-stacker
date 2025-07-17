@@ -137,7 +137,7 @@ class PositionManager {
 
     // Update chart with current positions
     updateChart() {
-        if (this.chartDisplay && this.positions.length > 0) {
+        if (this.chartDisplay) {
             console.log('PositionManager.updateChart - currentPrice:', this.currentPrice);
             this.chartDisplay.updatePositions(this.positions, this.currentPrice);
         }
