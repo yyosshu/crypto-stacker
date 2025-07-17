@@ -26,7 +26,7 @@ class CryptoStackerApp {
             this.chartDisplay = new ChartDisplay('priceChart');
             this.wsManager = new WebSocketManager();
             this.apiClient = new ApiClient();
-            this.candleManager = new CandleManager('5min'); // Default 5min
+            this.candleManager = new CandleManager('1day'); // Default 1day
             this.positionManager = new PositionManager();
             this.profitLossDisplay = new ProfitLossDisplay(this.positionManager);
             
@@ -48,8 +48,8 @@ class CryptoStackerApp {
             // Setup timeframe controls
             this.setupTimeframeControls();
             
-            // Load initial candlestick data (5min default)
-            await this.loadInitialData('5min');
+            // Load initial candlestick data (1day default)
+            await this.loadInitialData('1day');
             
             // Connect to WebSocket for real-time updates
             this.wsManager.connect();

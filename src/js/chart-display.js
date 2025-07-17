@@ -5,7 +5,7 @@ class ChartDisplay {
         this.chart = null;
         this.dataPoints = [];
         this.maxDataPoints = 100; // Fixed count for all timeframes
-        this.currentTimeframe = '5min';
+        this.currentTimeframe = '1day';
         
         // Chart configuration
         this.chartConfig = {
@@ -66,7 +66,8 @@ class ChartDisplay {
                                 hour: 'HH:mm',
                                 day: 'MM/dd'
                             },
-                            unit: 'minute'
+                            unit: 'day',
+                            stepSize: 1
                         },
                         grid: {
                             display: true,
@@ -116,18 +117,20 @@ class ChartDisplay {
     }
 
     updateTimeUnit(timeframe) {
-        // Update time unit based on timeframe
-        const timeUnits = {
-            '1min': 'minute',
-            '5min': 'minute',
-            '15min': 'minute',
-            '30min': 'minute',
-            '1hour': 'hour',
-            '4hour': 'hour',
-            '1day': 'day'
+        // Update time unit and stepSize based on timeframe
+        const timeSettings = {
+            '1min': { unit: 'minute', stepSize: 1 },
+            '5min': { unit: 'minute', stepSize: 5 },
+            '15min': { unit: 'minute', stepSize: 15 },
+            '30min': { unit: 'minute', stepSize: 30 },
+            '1hour': { unit: 'hour', stepSize: 1 },
+            '4hour': { unit: 'hour', stepSize: 4 },
+            '1day': { unit: 'day', stepSize: 1 }
         };
         
-        this.chart.options.scales.x.time.unit = timeUnits[timeframe] || 'minute';
+        const settings = timeSettings[timeframe] || { unit: 'minute', stepSize: 1 };
+        this.chart.options.scales.x.time.unit = settings.unit;
+        this.chart.options.scales.x.time.stepSize = settings.stepSize;
         this.chart.update('none');
     }
 
