@@ -2,6 +2,7 @@ class PositionManager {
     constructor() {
         this.positions = [];
         this.currentPrice = 0;
+        this.chartDisplay = null; // Will be set from app.js
         this.loadPositions();
     }
 
@@ -22,6 +23,7 @@ class PositionManager {
 
         this.positions.push(position);
         this.savePositions();
+        this.updateChart();
         return position;
     }
 
@@ -30,6 +32,7 @@ class PositionManager {
         if (index !== -1) {
             this.positions.splice(index, 1);
             this.savePositions();
+            this.updateChart();
             return true;
         }
         return false;
@@ -37,6 +40,7 @@ class PositionManager {
 
     updateCurrentPrice(price) {
         this.currentPrice = parseFloat(price);
+        this.updateChart();
     }
 
     calculateProfitLoss(position) {
@@ -121,4 +125,22 @@ class PositionManager {
             this.positions = [];
         }
     }
+
+    // Set chart display instance for updates
+    setChartDisplay(chartDisplay) {
+        this.chartDisplay = chartDisplay;
+        // Only update if we have current price data
+        if (this.currentPrice > 0) {
+            this.updateChart();
+        }
+    }
+
+    // Update chart with current positions
+    updateChart() {
+        if (this.chartDisplay && this.positions.length > 0) {
+            console.log('PositionManager.updateChart - currentPrice:', this.currentPrice);
+            this.chartDisplay.updatePositions(this.positions, this.currentPrice);
+        }
+    }
+
 }

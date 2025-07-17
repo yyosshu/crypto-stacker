@@ -25,6 +25,21 @@ class ChartDisplay {
                     pointBackgroundColor: '#C8A882',
                     pointBorderColor: '#ffffff',
                     pointBorderWidth: 2
+                }, {
+                    label: 'Positions',
+                    type: 'scatter',
+                    data: [],
+                    pointRadius: 8,
+                    pointHoverRadius: 12,
+                    pointBackgroundColor: function(context) {
+                        const data = context.raw;
+                        if (!data || !data.position || !data.currentPrice) return '#9CA3AF';
+                        const profitLoss = (data.currentPrice - data.position.purchasePrice) * data.position.quantity;
+                        return profitLoss >= 0 ? '#16a34a' : '#dc2626';
+                    },
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    showLine: false
                 }]
             },
             options: {
@@ -39,7 +54,81 @@ class ChartDisplay {
                         display: false
                     },
                     tooltip: {
-                        enabled: false
+                        enabled: true,
+                        filter: function(tooltipItem) {
+                            // Only show tooltip for positions (dataset index 1)
+                            return tooltipItem.datasetIndex === 1;
+                        },
+                        callbacks: {
+                            title: function() {
+                                return 'ポジション詳細';
+                            },
+                            label: function(context) {
+                                const data = context.raw;
+                                if (!data || !data.position) return '';
+                                
+                                const position = data.position;
+                                const currentPrice = data.currentPrice || 0;
+                                
+                                console.log('Tooltip data:', { position, currentPrice, data });
+                                
+                                if (currentPrice === 0) {
+                                    return [
+                                        `購入日時: ${formatDate(position.timestamp)}`,
+                                        `購入価格: ${formatCurrency(position.purchasePrice)}`,
+                                        `購入数量: ${position.quantity.toFixed(8)} BTC`,
+                                        `損益額: 価格データ取得中...`,
+                                        `損益率: 価格データ取得中...`
+                                    ];
+                                }
+                                
+                                const profitLoss = (currentPrice - position.purchasePrice) * position.quantity;
+                                const profitLossRate = position.purchasePrice > 0 ? 
+                                    (profitLoss / (position.purchasePrice * position.quantity)) * 100 : 0;
+                                
+                                const formatCurrency = (amount) => {
+                                    if (isNaN(amount)) return '¥0';
+                                    return '¥' + Math.abs(amount).toLocaleString('ja-JP', { maximumFractionDigits: 0 });
+                                };
+                                
+                                const formatDate = (timestamp) => {
+                                    const date = new Date(timestamp);
+                                    if (isNaN(date.getTime())) return '不明';
+                                    return date.toLocaleString('ja-JP', {
+                                        month: '2-digit',
+                                        day: '2-digit',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                    });
+                                };
+                                
+                                return [
+                                    `購入日時: ${formatDate(position.timestamp)}`,
+                                    `購入価格: ${formatCurrency(position.purchasePrice)}`,
+                                    `購入数量: ${position.quantity.toFixed(8)} BTC`,
+                                    `損益額: ${profitLoss >= 0 ? '+' : '-'}${formatCurrency(profitLoss)}`,
+                                    `損益率: ${profitLoss >= 0 ? '+' : ''}${profitLossRate.toFixed(2)}%`
+                                ];
+                            },
+                            labelColor: function(context) {
+                                const data = context.raw;
+                                if (!data || !data.position) return { borderColor: '#9CA3AF', backgroundColor: '#9CA3AF' };
+                                
+                                const currentPrice = data.currentPrice || 0;
+                                const profitLoss = (currentPrice - data.position.purchasePrice) * data.position.quantity;
+                                const color = profitLoss >= 0 ? '#16a34a' : '#dc2626';
+                                
+                                return {
+                                    borderColor: color,
+                                    backgroundColor: color
+                                };
+                            }
+                        },
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: '#ffffff',
+                        bodyColor: '#ffffff',
+                        borderColor: '#ffffff',
+                        borderWidth: 1
                     }
                 },
                 scales: {
@@ -501,5 +590,65 @@ class ChartDisplay {
         this.dataPoints = [];
         this.updateChartData();
         this.chart.update();
+    }
+
+    // Update positions data
+    updatePositions(positions, currentPrice) {
+        if (!this.chart || !positions) return;
+        
+        // Filter positions within chart time range
+        const chartTimeRange = this.getChartTimeRange();
+        const chartPriceRange = this.getChartPriceRange();
+        
+        const displayablePositions = positions.filter(position => {
+            return this.isPositionDisplayable(position, chartTimeRange, chartPriceRange);
+        });
+        
+        // Convert positions to chart data format
+        const positionData = displayablePositions.map(position => ({
+            x: new Date(position.timestamp).toISOString(),
+            y: position.purchasePrice,
+            position: position,
+            currentPrice: currentPrice
+        }));
+        
+        // Update positions dataset
+        this.chart.data.datasets[1].data = positionData;
+        this.chart.update('none');
+    }
+
+    // Get chart time range for position filtering
+    getChartTimeRange() {
+        if (this.dataPoints.length === 0) return { min: 0, max: 0 };
+        
+        const timestamps = this.dataPoints.map(point => new Date(point.x).getTime());
+        return {
+            min: Math.min(...timestamps),
+            max: Math.max(...timestamps)
+        };
+    }
+
+    // Get chart price range for position filtering
+    getChartPriceRange() {
+        if (this.dataPoints.length === 0) return { min: 0, max: 0 };
+        
+        const prices = this.dataPoints.map(point => point.y);
+        const minPrice = Math.min(...prices);
+        const maxPrice = Math.max(...prices);
+        const padding = (maxPrice - minPrice) * 0.05;
+        
+        return {
+            min: minPrice - padding,
+            max: maxPrice + padding
+        };
+    }
+
+    // Check if position should be displayed on chart
+    isPositionDisplayable(position, chartTimeRange, chartPriceRange) {
+        const inTimeRange = position.timestamp >= chartTimeRange.min && 
+                           position.timestamp <= chartTimeRange.max;
+        const inPriceRange = position.purchasePrice >= chartPriceRange.min && 
+                            position.purchasePrice <= chartPriceRange.max;
+        return inTimeRange && inPriceRange;
     }
 }

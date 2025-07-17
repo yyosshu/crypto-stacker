@@ -30,6 +30,9 @@ class CryptoStackerApp {
             this.positionManager = new PositionManager();
             this.profitLossDisplay = new ProfitLossDisplay(this.positionManager);
             
+            // Connect position manager to chart display
+            this.positionManager.setChartDisplay(this.chartDisplay);
+            
             // Initial render of profit/loss display
             this.profitLossDisplay.render();
             
