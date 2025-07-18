@@ -201,13 +201,12 @@ class ChartDisplay {
         this.currentTimeframe = timeframe;
         this.maxDataPoints = 100; // Fixed count for all timeframes
         
-        // Update time unit and display format
-        this.updateTimeUnit(timeframe);
-        
-        // Clear current data
+        // Clear current data first
         this.dataPoints = [];
         this.updateChartData();
-        this.chart.update();
+        
+        // Then update time unit and display format
+        this.updateTimeUnit(timeframe);
         
         console.log(`Changed to ${timeframe} timeframe`);
     }
